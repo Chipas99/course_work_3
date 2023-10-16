@@ -1,50 +1,30 @@
 import pytest
-from src.utils import filter_and_sorting, get_date, mask_prepare_message_number, mask_card_number, mask_account_number, prepare_user_message
+import src.utils
 
 def test_filter_and_sorting():
     data = [
-        {"state": "EXECUTED", "date": "2022-01-01"},
-        {"state": "PENDING", "date": "2022-01-02"},
-        {"state": "EXECUTED", "date": "2022-01-03"},
-        {"state": "EXECUTED", "date": "2022-01-04"},
+        {"state": "EXECUTED", "date": "2023-10-12"},
+        {"state": "NOT_EXECUTED", "date": "2023-10-11"},
+        {"state": "EXECUTED", "date": "2023-10-10"}
     ]
-
-    result = filter_and_sorting(data)
-
-    assert len(result) == 3
-    assert result[0]["date"] == "2022-01-04"
-    assert result[1]["date"] == "2022-01-03"
-    assert result[2]["date"] == "2022-01-01"
+    result = src.utils.filter_and_sorting(data)
+    assert len(result) == 2, "Should have filtered to 2 items"
+    assert result[0]['date'] == "2023-10-12", "Should be sorted by date in descending order"
 
 def test_get_date():
-    date = "2022-01-01"
+    date_str = "2023-10-12T14:30:00Z"
+    result = src.utils.get_date(date_str)
+    assert result == '12.10.2023', "Should format date correctly"
 
-    result = get_date(date)
 
-    assert result == "01.01.2022"
+def test_mask_account_number():
+    account_number = '12345678'
+    result = src.utils.mask_account_number(account_number)
+    assert result == '**5678', "Should mask account number correctly"
+
 
 def test_mask_prepare_message_number():
-    message_1 = "Счет 1234567890123456"
-    message_2 = "Карта 1234567890123456"
-    message_3 = None
-
-    result_1 = mask_prepare_message_number(message_1)
-    result_2 = mask_prepare_message_number(message_2)
-    result_3 = mask_prepare_message_number(message_3)
-
-    assert result_1 == "Счет **** **** **** 3456"
-    assert result_2 == "Карта **** **** **** 3456"
-    assert result_3 is None
-
-def test_mask_card_number():
-
-    number_1 = "1234567890123456"
-    number_2 = "12345678"
-
-    masked_number_1 = mask_card_number(number_1)
-    print(masked_number_1)
-
-    masked_number_2 = mask_card_number(number_2)
-    print(masked_number_2)
-
+    message = 'Счет 12345678'
+    result = src.utils.mask_prepare_message_number(message)
+    assert result == 'Счет **5678', "Should replace account number correctly"
 

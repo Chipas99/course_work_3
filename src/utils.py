@@ -14,35 +14,34 @@ def get_date(date: str):
     return date_num[2] + '.' + date_num[1] + '.' + date_num[0]
 
 def mask_prepare_message_number(message):
-    if message is None:
-        return None
+    if not message:  # Проверяем, что сообщение не пустое
+        return 'Личный счет'
 
-    words = message.split()
-    masked_words = []
-
-    for word in words:
-        if word.isdigit() and len(word) == 16:
-            masked_word = mask_card_number(word)
-            masked_words.append(masked_word)
+    message_split = message.split(' ')
+    if len(message_split) > 1:
+        if message_split[0] == 'Счет':
+            hidden_number = mask_account_number(message_split[-1])
         else:
-            masked_words.append(word)
+            hidden_number = mask_card_number(message_split[-1])
 
-    return ' '.join(masked_words)
-
-
-
-def mask_card_number(number):
-    if number.isdigit() and len(number) == 16:
-        return "**** **** **** " + number[-4:]
+        return ' '.join(message_split[:-1]) + ' ' + hidden_number
     else:
-        return number
+        return message
+
+
+
+def mask_card_number(number: str):
+    if number.isdigit() and len(number) == 16:
+        return number[:4] + ' ' + number[4:6] + '** **** ' + number[-4:]
+    else:
+        return 'номер карты не подходит'
 
 
 def mask_account_number(number: str):
     if number.isdigit() and len(number) >= 4:
-        return "**"+number[-4:]
+        return '**' + number[-4:]
     else:
-        raise ValueError('Неправильный номер счета')
+        return 'номер счета не подходит'
 
 
 
@@ -51,7 +50,7 @@ def prepare_user_message(item: dict):
     desc = item.get('description')
     from_ = mask_prepare_message_number(item.get('from'))
     to_ = mask_prepare_message_number(item.get('to'))
-    amount = item.get('operationAmount', {}).get('amount')
+    amount = item.get('operationAmount').get('amount')
     curr = item.get('operationAmount').get('currency').get('name')
 
     return f'{date} {desc}\n{from_} -> {to_}\n{amount} {curr}\n'
