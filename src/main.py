@@ -12,4 +12,5 @@ def display_operations():
     for i in range(5):
         print(prepare_user_message(items[i]))
 
-
+if __name__ == "__main__":
+    display_operations()

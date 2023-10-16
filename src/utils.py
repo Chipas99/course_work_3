@@ -14,31 +14,34 @@ def get_date(date: str):
     return date_num[2] + '.' + date_num[1] + '.' + date_num[0]
 
 def mask_prepare_message_number(message):
-    if message is None:
+    if not message:  # Проверяем, что сообщение не пустое
         return 'Личный счет'
 
     message_split = message.split(' ')
-    if message_split[0] == 'Счет':
-        hidden_number = mask_account_number(message_split[-1])
-    else:
-        hidden_number = mask_card_number(message_split[-1])
+    if len(message_split) > 1:
+        if message_split[0] == 'Счет':
+            hidden_number = mask_account_number(message_split[-1])
+        else:
+            hidden_number = mask_card_number(message_split[-1])
 
-    return ' '.join(message_split[:-1]) + ' ' + hidden_number
+        return ' '.join(message_split[:-1]) + ' ' + hidden_number
+    else:
+        return message
 
 
 
 def mask_card_number(number: str):
-    if number.isdigit() == len(number) == 16:
+    if number.isdigit() and len(number) == 16:
         return number[:4] + ' ' + number[4:6] + '** **** ' + number[-4:]
     else:
-        print('номер карты не подходит')
+        return 'номер карты не подходит'
 
 
 def mask_account_number(number: str):
     if number.isdigit() and len(number) >= 4:
-        return "**"+number[-4:]
+        return '**' + number[-4:]
     else:
-        print('номер счета не подходит')
+        return 'номер счета не подходит'
 
 
 
@@ -51,3 +54,4 @@ def prepare_user_message(item: dict):
     curr = item.get('operationAmount').get('currency').get('name')
 
     return f'{date} {desc}\n{from_} -> {to_}\n{amount} {curr}\n'
+
